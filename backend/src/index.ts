@@ -1,0 +1,35 @@
+//MAIN Server Entry point
+import express from 'express';
+import http from 'http';
+import cors from 'cors';
+import dotenv from 'dotenv';
+import { Server as SocketIOServer } from 'socket.io';
+import { MQTTIngestionService } from './services/mqtt.service';
+
+dotenv.config();
+
+const app = express();
+const server = http.createServer(app);
+const io = new SocketIOServer(server, {
+  cors: { origin: '*' }
+});
+
+app.use(cors());
+app.use(express.json());
+
+// Initialize MQTT Ingestion Engine
+new MQTTIngestionService(io);
+
+app.get('/health', (req, res) => {
+  res.json({ status: 'healthy', timestamp: new Date() });
+});
+
+io.on('connection', (socket) => {
+  console.log(`🔌 Client connected: ${socket.id}`);
+  socket.on('disconnect', () => console.log(`🔌 Client disconnected: ${socket.id}`));
+});
+
+const PORT = process.env.PORT || 5000;
+server.listen(PORT, () => {
+  console.log(`🚀 Backend running on http://localhost:${PORT}`);
+});
