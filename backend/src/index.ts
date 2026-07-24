@@ -5,6 +5,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import { Server as SocketIOServer } from 'socket.io';
 import { MQTTIngestionService } from './services/mqtt.service';
+import authRoutes from './routes/auth.routes';
 
 dotenv.config();
 
@@ -16,6 +17,8 @@ const io = new SocketIOServer(server, {
 
 app.use(cors());
 app.use(express.json());
+
+app.use('/api/auth', authRoutes);
 
 // Initialize MQTT Ingestion Engine
 new MQTTIngestionService(io);
